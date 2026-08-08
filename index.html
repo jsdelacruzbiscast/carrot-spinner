@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Roster - CARROT Spinner</title>
+  <style>
+    :root {
+      --maroon: #800000;
+      --gold: #FFD700;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.85);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at top center, #1e293b 0%, var(--bg) 100%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+    }
+    .badge { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    h2 { color: var(--gold); margin-bottom: 0.5rem; font-size: 1.6rem; }
+    p { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1.5rem; }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.85rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      background: rgba(15, 23, 42, 0.9);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--gold); box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+    button {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--gold) 0%, #c7a700 100%);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .status { margin-top: 1rem; font-weight: 600; font-size: 0.9rem; }
+    .status.success { color: #4ade80; }
+    .status.error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">BISCAST Student Development Services</div>
+    <h2>🥕 Join Spin Roster</h2>
+    <p>Enter your full name to participate in the live spin draw:</p>
+    <form id="entryForm">
+      <input type="text" id="participantName" placeholder="Enter your full name" required maxlength="60" autocomplete="off" />
+      <button type="submit" id="submitBtn">Submit Entry</button>
+    </form>
+    <div id="statusMsg" class="status"></div>
+  </div>
+
+  <script>
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbyKGHEUW7PzF3mlkQuPDs7j8imrgNi-aTQKLyApPLDCfarpjo_01mNc6kR8area5sM8/exec";
+
+    const form = document.getElementById('entryForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('participantName').value.trim();
+      if (!name) return;
+
+      submitBtn.disabled = true;
+      statusMsg.className = 'status';
+      statusMsg.innerText = 'Submitting entry...';
+
+      try {
+        await fetch(API_ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'submitName', name: name, section: 'Pangalan' })
+        });
+
+        statusMsg.className = 'status success';
+        statusMsg.innerText = '✅ Submitted! Watch the main stage screen.';
+        form.reset();
+      } catch (err) {
+        statusMsg.className = 'status error';
+        statusMsg.innerText = '❌ Failed to submit. Please try again.';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
