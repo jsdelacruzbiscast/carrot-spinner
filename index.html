@@ -3,115 +3,984 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Join Roster - CARROT Spinner</title>
+  <title>CARROT Spinner - BISCAST SDS</title>
+  <!-- Canvas Confetti & QR Code Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
+    /* Theme Variables */
     :root {
       --maroon: #800000;
+      --maroon-dark: #5a0000;
       --gold: #FFD700;
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.85);
+      --gold-dark: #c7a700;
+      --dark-bg: #0A0E1A;
+      --card-bg: rgba(30, 41, 59, 0.75);
+      --border-color: rgba(255, 215, 0, 0.25);
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body {
-      background: radial-gradient(circle at top center, #1e293b 0%, var(--bg) 100%);
-      color: #fff;
+
+    /* Cyberpunk Theme Class */
+    body.theme-cyberpunk {
+      --maroon: #00f0ff;
+      --maroon-dark: #0080ff;
+      --gold: #ff007f;
+      --gold-dark: #b30059;
+      --dark-bg: #0d0221;
+      --card-bg: rgba(26, 14, 46, 0.8);
+      --border-color: rgba(255, 0, 127, 0.4);
+      --text-main: #00f0ff;
+    }
+
+    /* Ocean Breeze Theme Class */
+    body.theme-ocean {
+      --maroon: #0284c7;
+      --maroon-dark: #0369a1;
+      --gold: #38bdf8;
+      --gold-dark: #0284c7;
+      --dark-bg: #0f172a;
+      --card-bg: rgba(15, 23, 42, 0.8);
+      --border-color: rgba(56, 189, 248, 0.3);
+      --text-main: #f0f9ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top center, #1e293b 0%, var(--dark-bg) 100%);
+      color: var(--text-main);
+      transition: background 0.3s ease;
+    }
+
+    .app-container {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      padding: 10px 14px;
+      gap: 10px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      min-height: 100vh;
-      padding: 1rem;
+      background: rgba(128, 0, 0, 0.85);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
     }
-    .card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      border-radius: 16px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      backdrop-filter: blur(10px);
+
+    .title-group { display: flex; flex-direction: column; }
+    header h1 { font-size: 1.15rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; line-height: 1.1; }
+    .app-version-tag { font-size: 0.72rem; color: #cbd5e1; font-weight: 400; letter-spacing: 0.5px; margin-top: 2px; }
+
+    .nav-tabs { display: flex; gap: 6px; background: rgba(0, 0, 0, 0.3); padding: 3px; border-radius: 8px; }
+    .tab-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease;
     }
-    .badge { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-    h2 { color: var(--gold); margin-bottom: 0.5rem; font-size: 1.6rem; }
-    p { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1.5rem; }
-    input[type="text"] {
-      width: 100%;
-      padding: 0.85rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      background: rgba(15, 23, 42, 0.9);
-      color: #fff;
-      font-size: 1rem;
-      outline: none;
+    .tab-btn.active { background: var(--gold); color: #000; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3); }
+
+    .attribution-badge {
+      font-size: 0.72rem; color: #e2e8f0; background: rgba(0, 0, 0, 0.3);
+      padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255, 215, 0, 0.3);
     }
-    input[type="text"]:focus { border-color: var(--gold); box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
-    button {
-      width: 100%;
-      padding: 0.85rem;
-      background: linear-gradient(135deg, var(--gold) 0%, #c7a700 100%);
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: bold;
+
+    .content-viewport { flex: 1; position: relative; overflow: hidden; display: flex; }
+    .tab-pane { display: none; width: 100%; height: 100%; }
+    .tab-pane.active { display: flex; }
+
+    /* TAB 1: WHEEL STAGE */
+    #stage-tab { justify-content: center; align-items: center; flex-direction: column; position: relative; }
+    .canvas-wrapper {
+      position: relative; display: flex; justify-content: center; align-items: center;
+      height: calc(100vh - 130px); width: calc(100vh - 130px); max-height: 620px; max-width: 620px;
+    }
+    canvas { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0,0,0,0.5); }
+    .pointer {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent;
+      border-top: 30px solid var(--gold); z-index: 10; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+    }
+    .stage-controls { margin-top: 8px; display: flex; gap: 10px; width: 100%; max-width: 450px; }
+
+    .btn {
+      padding: 8px 14px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+      gap: 0.4rem; text-transform: uppercase;
+    }
+    .btn-spin { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); color: #000; box-shadow: 0 3px 12px rgba(255, 215, 0, 0.3); }
+    .btn-spin:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(255, 215, 0, 0.4); }
+    .btn-spin:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+
+    /* TAB PANELS */
+    #roster-tab, #settings-tab { gap: 12px; width: 100%; }
+    .panel-card {
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px; backdrop-filter: blur(10px);
+    }
+    .panel-left { width: 340px; flex-shrink: 0; }
+    .panel-right { flex: 1; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    label { font-size: 0.75rem; color: var(--gold); font-weight: 700; text-transform: uppercase; }
+    input, select, textarea {
+      background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color);
+      color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; outline: none;
+    }
+    textarea { resize: none; flex: 1; min-height: 160px; font-family: monospace; }
+    .row-flex { display: flex; gap: 8px; }
+
+    /* Switch Component */
+    .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #475569; transition: .3s; border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    .switch input:checked + .slider { background-color: #10b981; }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+
+    .roster-list { flex: 1; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 6px; background: rgba(0,0,0,0.2); }
+    .roster-item { padding: 4px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.8rem; }
+    .status-text { font-size: 0.72rem; color: #4ade80; }
+
+    /* TAB 3: TEAM GENERATOR */
+    #teams-tab { flex-direction: column; gap: 10px; width: 100%; }
+    .team-generator-controls {
+      display: flex; gap: 10px; align-items: center; background: var(--card-bg);
+      border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; flex-shrink: 0;
+    }
+    .teams-grid-wrapper { flex: 1; overflow-y: auto; padding-right: 4px; }
+    .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; align-content: start; }
+    .team-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .team-card h3 { font-size: 0.85rem; color: var(--gold); border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+    .team-card ul { list-style: none; font-size: 0.8rem; }
+    .team-card li { padding: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: linear-gradient(135deg, var(--maroon-dark) 0%, #1e1111 100%);
+      border: 2px solid var(--gold); border-radius: 16px; padding: 2rem;
+      text-align: center; max-width: 520px; width: 90%;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-overlay.active .modal-card { transform: scale(1); }
+    .winner-title { color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+
+    /* REFINED: BIGGER NAME FONT */
+    .winner-name {
+      font-size: 2.8rem;
+      font-weight: 900;
+      margin: 0.6rem 0 1.2rem 0;
+      color: #ffffff;
+      word-break: break-word;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* EMBEDDED MODAL SPEAKER TIMER */
+    .modal-timer-box {
+      margin: 10px 0 16px 0;
+      background: rgba(15, 23, 42, 0.7); border: 1px solid var(--gold);
+      padding: 10px; border-radius: 10px; display: none;
+    }
+    .modal-timer-box.active { display: block; }
+    .modal-timer-val { font-size: 2rem; font-weight: 800; font-family: monospace; color: var(--gold); }
+
+    /* REFINED: 50% TRANSPARENT LABEL */
+    .modal-timer-label {
+      font-size: 0.7rem;
       text-transform: uppercase;
-      cursor: pointer;
-      transition: transform 0.2s;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      opacity: 0.5;
     }
-    button:hover { transform: translateY(-2px); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .status { margin-top: 1rem; font-weight: 600; font-size: 0.9rem; }
-    .status.success { color: #4ade80; }
-    .status.error { color: #f87171; }
+
+    #qrcode-box { display: flex; justify-content: center; padding: 12px; background: #fff; border-radius: 8px; margin: 12px 0; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="badge">BISCAST Student Development Services</div>
-    <h2>🥕 Join Spin Roster</h2>
-    <p>Enter your full name to participate in the live spin draw:</p>
-    <form id="entryForm">
-      <input type="text" id="participantName" placeholder="Enter your full name" required maxlength="60" autocomplete="off" />
-      <button type="submit" id="submitBtn">Submit Entry</button>
-    </form>
-    <div id="statusMsg" class="status"></div>
+
+  <div class="app-container">
+    <header>
+      <div class="title-group">
+        <h1>🥕 CARROT Spinner</h1>
+        <div class="app-version-tag">jonatzdelacruz | v2.2</div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('stage-tab', this)">Wheel Stage</button>
+        <button class="tab-btn" onclick="switchTab('roster-tab', this)">Roster & Sync</button>
+        <button class="tab-btn" onclick="switchTab('teams-tab', this)">Team Generator</button>
+        <button class="tab-btn" onclick="switchTab('settings-tab', this)">⚙️ Settings</button>
+      </nav>
+      <div class="attribution-badge">
+        BISCAST Student Development Services
+      </div>
+    </header>
+
+    <div class="content-viewport">
+      
+      <!-- TAB 1: WHEEL STAGE -->
+      <div id="stage-tab" class="tab-pane active">
+        <div class="canvas-wrapper">
+          <div class="pointer"></div>
+          <canvas id="wheelCanvas" width="700" height="700"></canvas>
+        </div>
+        <div class="stage-controls">
+          <button id="spinBtn" class="btn btn-spin" onclick="spin()">Spin Wheel</button>
+          <button id="qrBtn" class="btn btn-secondary" onclick="showQrModal()">Show QR Code</button>
+          <button id="resetBtn" class="btn btn-secondary" onclick="resetRoster()">Reset</button>
+        </div>
+      </div>
+
+      <!-- TAB 2: ROSTER & SYNC -->
+      <div id="roster-tab" class="tab-pane">
+        <div class="panel-card panel-left">
+          <h3>📋 Sync Controls</h3>
+          
+          <div class="form-group">
+            <label for="sectionSelect">Roster Sheet Tab</label>
+            <select id="sectionSelect" onchange="loadRoster(this.value, false)">
+              <option value="Pangalan">Pangalan</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>📡 Auto-Sync Control</label>
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 6px;">
+              <span style="font-size: 0.8rem;">Auto-Sync Sheet</span>
+              <label class="switch">
+                <input type="checkbox" id="autoSyncToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="row-flex">
+            <button id="lockRosterBtn" class="btn btn-secondary" style="flex:1;">🔒 Lock Roster</button>
+            <button id="syncBtn" class="btn btn-secondary" style="flex:1;">🔄 Sync Now</button>
+          </div>
+          <span class="status-text" id="pollStatus">🟢 Live sync active</span>
+
+          <div class="form-group" style="margin-top: 6px;">
+            <label for="drawMode">⚙️ Selection Mode</label>
+            <select id="drawMode">
+              <option value="single">Single Winner</option>
+              <option value="nonRepeat">Non-Repeat Elimination</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel-card panel-right">
+          <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+            <label for="manualEntries">✍️ Direct Manual Roster Text</label>
+            <textarea id="manualEntries" placeholder="Enter names (one per line)..."></textarea>
+            <button id="applyManualBtn" class="btn btn-secondary" style="margin-top: 6px; align-self: flex-start;">Apply Manual List</button>
+          </div>
+
+          <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+            <label>👥 Active Roster Entries (<span id="rosterCount">0</span>)</label>
+            <div class="roster-list" id="rosterListDisplay"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: TEAM GENERATOR -->
+      <div id="teams-tab" class="tab-pane">
+        <div class="team-generator-controls">
+          <label for="groupCount">Number of Teams:</label>
+          <input type="number" id="groupCount" value="3" min="2" max="50" style="width: 70px;">
+          <button class="btn btn-spin" onclick="generateTeams()">Generate Teams</button>
+          <button class="btn btn-secondary" onclick="copyTeamsToClipboard()">📋 Copy Teams</button>
+        </div>
+
+        <div class="teams-grid-wrapper">
+          <div id="teamsGrid" class="teams-grid"></div>
+        </div>
+      </div>
+
+      <!-- TAB 4: SETTINGS TAB -->
+      <div id="settings-tab" class="tab-pane">
+        <div class="panel-card panel-left">
+          <h3>Stage & Timer Settings</h3>
+          
+          <div class="form-group">
+            <label>⏱️ Speaker Countdown Timer</label>
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 6px;">
+              <span style="font-size: 0.8rem;">Enable Speaker Timer</span>
+              <label class="switch">
+                <input type="checkbox" id="timerEnableToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="row-flex">
+            <div class="form-group" style="flex: 1;">
+              <label for="timerDuration">Duration</label>
+              <input type="number" id="timerDuration" value="60" min="5" max="3600">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="timerUnit">Unit</label>
+              <select id="timerUnit">
+                <option value="seconds">Seconds</option>
+                <option value="minutes">Minutes</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 10px;">
+            <label for="qrUrlInput">Audience QR Code URL</label>
+            <input type="text" id="qrUrlInput" value="https://example.com/submit.html" placeholder="https://your-domain.com/submit.html">
+          </div>
+        </div>
+
+        <div class="panel-card panel-right">
+          <h3>Sound & Visual Themes</h3>
+
+          <div class="form-group">
+            <label for="themeSelect">UI Color Theme</label>
+            <select id="themeSelect" onchange="applyTheme(this.value)">
+              <option value="biscast">BISCAST Gold & Maroon (Default)</option>
+              <option value="cyberpunk">Cyberpunk Neon</option>
+              <option value="ocean">Ocean Breeze</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Audio Controls</label>
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 6px;">
+              <span style="font-size: 0.8rem;">Sound FX Enabled</span>
+              <label class="switch">
+                <input type="checkbox" id="soundToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="soundProfileSelect">🎵 Sound Profile</label>
+            <select id="soundProfileSelect">
+              <option value="classic">Classic Wheel Tick</option>
+              <option value="arcade">Arcade Chime</option>
+              <option value="click">Minimalist Click</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WINNER OVERLAY MODAL (WITH EMBEDDED SPEAKER TIMER) -->
+  <div class="modal-overlay" id="winnerModal">
+    <div class="modal-card">
+      <div class="winner-title" id="modalTitle">🎉 WINNER SELECTED 🎉</div>
+      <div class="winner-name" id="winnerDisplay">Student Name</div>
+
+      <!-- Embedded Speaker Countdown Display -->
+      <div class="modal-timer-box" id="modalTimerBox">
+        <div class="modal-timer-val" id="modalTimerDisplay">00:00</div>
+        <div class="modal-timer-label">Speaker Time Remaining</div>
+      </div>
+
+      <button class="btn btn-spin" id="closeModalBtn" style="width: 100%;" onclick="closeModal()">Continue</button>
+    </div>
+  </div>
+
+  <!-- QR CODE MODAL -->
+  <div class="modal-overlay" id="qrModal">
+    <div class="modal-card">
+      <div class="winner-title">SCAN TO JOIN ROSTER</div>
+      <div id="qrcode-box"></div>
+      <button class="btn btn-secondary" style="width: 100%;" onclick="closeQrModal()">Close</button>
+    </div>
   </div>
 
   <script>
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbyKGHEUW7PzF3mlkQuPDs7j8imrgNi-aTQKLyApPLDCfarpjo_01mNc6kR8area5sM8/exec";
+    const CONFIG = {
+      ENDPOINT: 'https://script.google.com/macros/s/AKfycbyKGHEUW7PzF3mlkQuPDs7j8imrgNi-aTQKLyApPLDCfarpjo_01mNc6kR8area5sM8/exec',
+      COLOR_PALETTE: ['#800000', '#1E293B', '#D97706', '#0F766E', '#4338CA', '#0369A1', '#7C3AED'],
+      EPSILON: 0.0001
+    };
 
-    const form = document.getElementById('entryForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const statusMsg = document.getElementById('statusMsg');
+    let masterRoster = [];
+    let activeRoster = [];
+    let pendingEliminationWinner = null;
+    let startAngle = 0;
+    let spinTimeout = null;
+    let spinAngleStart = 8;
+    let speedMultiplier = 1;
+    let currentSpeed = 0;
+    let spinTime = 0;
+    let spinTimeTotal = 0;
+    let isSpinning = false;
+    let isRosterLocked = false;
+    let pollInterval = null;
+    let lastSliceIndexUnderPointer = -1;
+    let countdownInterval = null;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('participantName').value.trim();
-      if (!name) return;
+    // Web Audio Synthesizer Engine
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function unlockAudio() { 
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      } 
+    }
 
-      submitBtn.disabled = true;
-      statusMsg.className = 'status';
-      statusMsg.innerText = 'Submitting entry...';
+    // Global Pre-warm Audio Unlocker
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
 
-      try {
-        await fetch(API_ENDPOINT, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'submitName', name: name, section: 'Pangalan' })
-        });
+    function playTickSound() {
+      if (!document.getElementById('soundToggle').checked) return;
+      unlockAudio();
+      
+      const profile = document.getElementById('soundProfileSelect').value;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
 
-        statusMsg.className = 'status success';
-        statusMsg.innerText = '✅ Submitted! Watch the main stage screen.';
-        form.reset();
-      } catch (err) {
-        statusMsg.className = 'status error';
-        statusMsg.innerText = '❌ Failed to submit. Please try again.';
-      } finally {
-        submitBtn.disabled = false;
+      if (profile === 'arcade') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.02);
+      } else if (profile === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.015);
+      } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.035);
+        gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.035);
       }
+
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.035);
+    }
+
+    function playVictorySound() {
+      if (!document.getElementById('soundToggle').checked) return;
+      unlockAudio();
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.1);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + idx * 0.1);
+        osc.stop(audioCtx.currentTime + idx * 0.1 + 0.3);
+      });
+    }
+
+    // Canvas Elements
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spinBtn');
+    const lockRosterBtn = document.getElementById('lockRosterBtn');
+    const autoSyncToggle = document.getElementById('autoSyncToggle');
+    const pollStatus = document.getElementById('pollStatus');
+    const sectionSelect = document.getElementById('sectionSelect');
+    const drawMode = document.getElementById('drawMode');
+    const rosterListDisplay = document.getElementById('rosterListDisplay');
+    const rosterCount = document.getElementById('rosterCount');
+    const manualEntries = document.getElementById('manualEntries');
+    const applyManualBtn = document.getElementById('applyManualBtn');
+    const winnerModal = document.getElementById('winnerModal');
+    const winnerDisplay = document.getElementById('winnerDisplay');
+    const modalTitle = document.getElementById('modalTitle');
+    const qrModal = document.getElementById('qrModal');
+
+    function sanitizeText(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.textContent;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchSections();
+      loadRoster(sectionSelect.value, false);
+      setupHotkeys();
+      startPolling();
+    });
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-pane').forEach(panel => panel.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+
+      if (tabId === 'stage-tab') {
+        requestAnimationFrame(() => drawWheel());
+      }
+    }
+
+    function applyTheme(theme) {
+      document.body.className = '';
+      if (theme === 'cyberpunk') document.body.classList.add('theme-cyberpunk');
+      else if (theme === 'ocean') document.body.classList.add('theme-ocean');
+      drawWheel();
+    }
+
+    function startPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(() => {
+        if (autoSyncToggle.checked && !isRosterLocked && !isSpinning && document.visibilityState === 'visible') {
+          loadRoster(sectionSelect.value, true);
+        }
+      }, 5000);
+    }
+
+    autoSyncToggle.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        pollStatus.innerText = '🟢 Live sync active';
+        pollStatus.style.color = '#4ade80';
+        loadRoster(sectionSelect.value, false);
+      } else {
+        pollStatus.innerText = 'Auto-sync paused';
+        pollStatus.style.color = 'var(--gold)';
+      }
+    });
+
+    manualEntries.addEventListener('input', () => {
+      if (autoSyncToggle.checked) {
+        autoSyncToggle.checked = false;
+        pollStatus.innerText = 'Auto-sync paused (Manual edits active)';
+        pollStatus.style.color = 'var(--gold)';
+      }
+    });
+
+    async function fetchSections() {
+      try {
+        const res = await fetch(`${CONFIG.ENDPOINT}?action=getSections`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.sections)) {
+          sectionSelect.innerHTML = '';
+          data.sections.forEach(sec => {
+            const opt = document.createElement('option');
+            opt.value = sec;
+            opt.textContent = sec;
+            sectionSelect.appendChild(opt);
+          });
+        }
+      } catch (e) { console.warn('Section fetch fallback', e); }
+    }
+
+    async function loadRoster(sheetName, silent = false) {
+      try {
+        const res = await fetch(`${CONFIG.ENDPOINT}?action=getRoster&sheet=${encodeURIComponent(sheetName)}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.roster)) {
+          const seen = new Set();
+          const uniqueRoster = [];
+          data.roster.forEach(item => {
+            const cleanName = sanitizeText(item.name);
+            if (cleanName && !seen.has(cleanName.toLowerCase())) {
+              seen.add(cleanName.toLowerCase());
+              uniqueRoster.push({ id: item.id || Math.random().toString(36).substring(2, 9), name: cleanName, weight: item.weight || 1 });
+            }
+          });
+
+          masterRoster = uniqueRoster;
+          if (!isSpinning) {
+            resetRoster();
+          }
+        }
+      } catch (e) {
+        if (!silent) console.error('Roster error', e);
+      }
+    }
+
+    function resetRoster() {
+      activeRoster = [...masterRoster];
+      pendingEliminationWinner = null;
+      updateManualTextarea();
+      renderRosterList();
+      drawWheel();
+    }
+
+    function updateManualTextarea() {
+      manualEntries.value = activeRoster.map(r => r.name).join('\n');
+    }
+
+    function renderRosterList() {
+      rosterListDisplay.innerHTML = '';
+      rosterCount.textContent = activeRoster.length;
+      activeRoster.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'roster-item';
+        div.textContent = item.name;
+        rosterListDisplay.appendChild(div);
+      });
+    }
+
+    lockRosterBtn.addEventListener('click', async () => {
+      unlockAudio();
+      isRosterLocked = !isRosterLocked;
+
+      if (isRosterLocked) {
+        clearInterval(pollInterval);
+        await loadRoster(sectionSelect.value, false);
+        lockRosterBtn.innerHTML = '🔓 Unlock Roster';
+        lockRosterBtn.style.backgroundColor = 'rgba(220, 38, 38, 0.4)';
+        pollStatus.innerText = '🔒 Roster locked for draw';
+        pollStatus.style.color = 'var(--gold)';
+        manualEntries.disabled = true;
+        applyManualBtn.disabled = true;
+      } else {
+        startPolling();
+        lockRosterBtn.innerHTML = '🔒 Lock Roster';
+        lockRosterBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        pollStatus.innerText = autoSyncToggle.checked ? '🟢 Live sync active' : 'Auto-sync paused';
+        pollStatus.style.color = autoSyncToggle.checked ? '#4ade80' : 'var(--gold)';
+        manualEntries.disabled = false;
+        applyManualBtn.disabled = false;
+      }
+    });
+
+    applyManualBtn.addEventListener('click', () => {
+      if (isRosterLocked) return;
+      unlockAudio();
+
+      autoSyncToggle.checked = false;
+      pollStatus.innerText = '⏸️ Auto-sync paused';
+      pollStatus.style.color = 'var(--gold)';
+
+      const lines = manualEntries.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      masterRoster = lines.map((name, idx) => ({ id: 'manual_' + idx + '_' + Date.now(), name: sanitizeText(name), weight: 1 }));
+      resetRoster();
+    });
+
+    // Slice Alignment Engine (5mm Margin Offset ≈ 19px)
+    function drawWheel() {
+      if (!ctx) return;
+      const N = activeRoster.length;
+      const width = canvas.width;
+      const height = canvas.height;
+      const outsideRadius = width / 2 - 15;
+      const insideRadius = 40;
+
+      const margin5mm = 19;
+      const textRadius = outsideRadius - margin5mm;
+
+      ctx.save();
+      ctx.clearRect(0, 0, width, height);
+
+      if (N === 0) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 22px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No Active Entries', width / 2, height / 2);
+        ctx.restore();
+        return;
+      }
+
+      const totalWeight = activeRoster.reduce((sum, item) => sum + item.weight, 0);
+      let currentAngle = startAngle;
+
+      for (let i = 0; i < N; i++) {
+        const sliceAngle = (activeRoster[i].weight / totalWeight) * (2 * Math.PI);
+        const color = CONFIG.COLOR_PALETTE[i % CONFIG.COLOR_PALETTE.length];
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(width / 2, height / 2, outsideRadius, currentAngle, currentAngle + sliceAngle, false);
+        ctx.arc(width / 2, height / 2, insideRadius, currentAngle + sliceAngle, currentAngle, true);
+        ctx.fill();
+        ctx.save();
+
+        if (N <= 80) {
+          ctx.fillStyle = '#FFFFFF';
+          const angleCenter = currentAngle + sliceAngle / 2;
+          
+          ctx.translate(
+            width / 2 + Math.cos(angleCenter) * textRadius,
+            height / 2 + Math.sin(angleCenter) * textRadius
+          );
+          ctx.rotate(angleCenter);
+          
+          const text = activeRoster[i].name;
+
+          const sliceDegree = (sliceAngle * 180) / Math.PI;
+          const fontFromSliceSpace = Math.floor(sliceDegree * 1.5);
+          const fontFromTextLength = Math.floor(280 / Math.max(text.length, 3));
+          const fontSize = Math.max(12, Math.min(30, fontFromSliceSpace, fontFromTextLength));
+          
+          ctx.font = `bold ${fontSize}px Segoe UI`;
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = 'rgba(0,0,0,0.6)';
+          ctx.shadowBlur = 4;
+          
+          ctx.fillText(text, 0, 0);
+        }
+        
+        ctx.restore();
+        currentAngle += sliceAngle;
+      }
+
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, insideRadius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--maroon') || '#800000';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--gold') || '#FFD700';
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function spin() {
+      unlockAudio();
+      if (isSpinning || activeRoster.length === 0) return;
+      isSpinning = true;
+      spinBtn.disabled = true;
+
+      spinAngleStart = Math.random() * 30 + 15; 
+      speedMultiplier = Math.random() * 1.2 + 0.8;
+      
+      spinTime = 0;
+      spinTimeTotal = Math.random() * 10000 + 10000; 
+      lastSliceIndexUnderPointer = getCurrentSliceUnderPointer();
+      rotateWheel();
+    }
+
+    function getCurrentSliceUnderPointer() {
+      if (activeRoster.length === 0) return -1;
+      const pointerAngle = 1.5 * Math.PI; 
+      const normalizedStart = (startAngle % (2 * Math.PI) + (2 * Math.PI)) % (2 * Math.PI);
+      let relativeAngle = (pointerAngle - normalizedStart + (2 * Math.PI)) % (2 * Math.PI);
+
+      const totalWeight = activeRoster.reduce((sum, item) => sum + item.weight, 0);
+      let accumulatedAngle = 0;
+
+      for (let i = 0; i < activeRoster.length; i++) {
+        const sliceAngle = (activeRoster[i].weight / totalWeight) * (2 * Math.PI);
+        if (relativeAngle >= accumulatedAngle - CONFIG.EPSILON && relativeAngle < accumulatedAngle + sliceAngle + CONFIG.EPSILON) {
+          return i;
+        }
+        accumulatedAngle += sliceAngle;
+      }
+      return 0;
+    }
+
+    function rotateWheel() {
+      spinTime += 30;
+      if (spinTime >= spinTimeTotal) {
+        stopRotateWheel();
+        return;
+      }
+
+      const progress = spinTime / spinTimeTotal;
+      const smoothDeceleration = Math.pow(1 - progress, 2.8);
+      
+      currentSpeed = spinAngleStart * speedMultiplier * smoothDeceleration;
+      startAngle += (currentSpeed * Math.PI / 180);
+      
+      const currentSlice = getCurrentSliceUnderPointer();
+      if (currentSlice !== lastSliceIndexUnderPointer) {
+        playTickSound();
+        lastSliceIndexUnderPointer = currentSlice;
+      }
+
+      drawWheel();
+      spinTimeout = setTimeout(rotateWheel, 30);
+    }
+
+    function stopRotateWheel() {
+      clearTimeout(spinTimeout);
+      isSpinning = false;
+      spinBtn.disabled = false;
+
+      const winningIndex = getCurrentSliceUnderPointer();
+      const winner = activeRoster[winningIndex];
+      announceWinner(winner);
+    }
+
+    function announceWinner(winner) {
+      playVictorySound();
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      }
+      modalTitle.textContent = "🎉 WINNER SELECTED 🎉";
+      winnerDisplay.textContent = winner.name;
+      
+      if (drawMode.value === 'nonRepeat') {
+        pendingEliminationWinner = winner;
+      }
+
+      startEmbeddedSpeakerTimer();
+      winnerModal.classList.add('active');
+    }
+
+    function startEmbeddedSpeakerTimer() {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      const timerBox = document.getElementById('modalTimerBox');
+      const timerDisplay = document.getElementById('modalTimerDisplay');
+
+      if (!document.getElementById('timerEnableToggle').checked) {
+        timerBox.classList.remove('active');
+        return;
+      }
+
+      const val = parseInt(document.getElementById('timerDuration').value) || 60;
+      const unit = document.getElementById('timerUnit').value;
+      let totalSeconds = unit === 'minutes' ? val * 60 : val;
+
+      timerBox.classList.add('active');
+
+      function updateDisplay() {
+        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const s = (totalSeconds % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${m}:${s}`;
+        
+        if (totalSeconds <= 0) {
+          clearInterval(countdownInterval);
+          timerDisplay.textContent = "00:00";
+        }
+        totalSeconds--;
+      }
+
+      updateDisplay();
+      countdownInterval = setInterval(updateDisplay, 1000);
+    }
+
+    function generateTeams() {
+      unlockAudio();
+      if (activeRoster.length === 0) return;
+      const numGroups = parseInt(document.getElementById('groupCount').value) || 2;
+      const grid = document.getElementById('teamsGrid');
+      grid.innerHTML = "";
+
+      let shuffled = [...activeRoster].sort(() => Math.random() - 0.5);
+      let teams = Array.from({ length: numGroups }, () => []);
+
+      shuffled.forEach((item, idx) => {
+        teams[idx % numGroups].push(item.name);
+      });
+
+      teams.forEach((team, idx) => {
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.innerHTML = `
+          <h3>Team ${idx + 1} (${team.length})</h3>
+          <ul>${team.map(m => `<li title="${m}">${m}</li>`).join('')}</ul>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function copyTeamsToClipboard() {
+      const cards = document.querySelectorAll('.team-card');
+      if (cards.length === 0) return;
+      let text = '';
+      cards.forEach(card => {
+        const title = card.querySelector('h3').innerText;
+        const members = Array.from(card.querySelectorAll('li')).map(li => ` - ${li.innerText}`).join('\n');
+        text += `${title}\n${members}\n\n`;
+      });
+      navigator.clipboard.writeText(text);
+      alert('📋 Teams copied to clipboard!');
+    }
+
+    function showQrModal() {
+      const box = document.getElementById('qrcode-box');
+      box.innerHTML = '';
+      
+      let rawUrl = (document.getElementById('qrUrlInput').value || '').trim();
+      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        rawUrl = window.location.href;
+      }
+
+      new QRCode(box, { text: rawUrl, width: 200, height: 200 });
+      qrModal.classList.add('active');
+    }
+
+    function closeQrModal() {
+      qrModal.classList.remove('active');
+    }
+
+    function setupHotkeys() {
+      document.addEventListener('keydown', (e) => {
+        const activeEl = document.activeElement;
+        const isTyping = activeEl && (
+          activeEl.tagName === 'INPUT' || 
+          activeEl.tagName === 'TEXTAREA' || 
+          activeEl.isContentEditable
+        );
+
+        if (isTyping) return;
+
+        if (e.code === 'Space') {
+          e.preventDefault();
+          if (winnerModal.classList.contains('active')) {
+            closeModal();
+          } else {
+            spin();
+          }
+        } else if (e.code === 'Escape') {
+          closeModal();
+          closeQrModal();
+        } else if (e.code === 'KeyR' && !isSpinning) {
+          e.preventDefault();
+          resetRoster();
+        }
+      });
+    }
+
+    function closeModal() {
+      winnerModal.classList.remove('active');
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      if (pendingEliminationWinner !== null) {
+        activeRoster = activeRoster.filter(item => item !== pendingEliminationWinner && item.id !== pendingEliminationWinner.id);
+        pendingEliminationWinner = null;
+        updateManualTextarea();
+        renderRosterList();
+        drawWheel();
+      }
+    }
+
+    document.getElementById('syncBtn').addEventListener('click', () => {
+      autoSyncToggle.checked = true;
+      pollStatus.innerText = '🟢 Live sync active';
+      pollStatus.style.color = '#4ade80';
+      loadRoster(sectionSelect.value, false);
     });
   </script>
 </body>
